@@ -1,6 +1,7 @@
 const express = require("express");
 const logger = require("morgan");
 const cors = require("cors");
+const { HttpCode } = require("./helpers/constants");
 
 const contactsRouter = require("./routes/api/contacts");
 
@@ -15,11 +16,13 @@ app.use(express.json());
 app.use("/api/contacts", contactsRouter);
 
 app.use((_req, res) => {
-  res.status(404).json({ status: "error", code: 404, message: "Not found" });
+  res
+    .status(HttpCode.NOT_FOUND)
+    .json({ status: "error", code: HttpCode.NOT_FOUND, message: "Not found" });
 });
 
 app.use((err, _req, res, _next) => {
-  const code = err.status || 500;
+  const code = err.status || HttpCode.INTERNAL_SERVER_ERROR;
   const status = err.status ? "error" : "fail";
   res.status(code).json({ status, code, message: err.message });
 });
