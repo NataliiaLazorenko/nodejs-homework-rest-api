@@ -1,9 +1,8 @@
 const express = require("express");
 const logger = require("morgan");
 const cors = require("cors");
-const { HttpCode } = require("./helpers/constants");
-
 const contactsRouter = require("./routes/api/contacts");
+const { HttpCode } = require("./helpers/constants");
 
 const app = express();
 

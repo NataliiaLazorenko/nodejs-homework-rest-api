@@ -4,7 +4,7 @@ const {
   addContact,
   removeContact,
   updateContact,
-} = require("../model/index");
+} = require("../model/contacts");
 const { HttpCode } = require("../helpers/constants");
 
 const getAll = async (_req, res, next) => {
