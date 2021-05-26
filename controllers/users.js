@@ -29,10 +29,12 @@ const signup = async (req, res, next) => {
     return res.status(HttpCode.CREATED).json({
       status: "success",
       code: HttpCode.CREATED,
-      user: {
-        id,
-        email,
-        subscription,
+      data: {
+        user: {
+          id,
+          email,
+          subscription,
+        },
       },
     });
   } catch (error) {
@@ -65,10 +67,12 @@ const login = async (req, res, next) => {
     return res.status(HttpCode.OK).json({
       status: "success",
       code: HttpCode.OK,
-      token: token,
-      user: {
-        email,
-        subscription,
+      data: {
+        token: token,
+        user: {
+          email,
+          subscription,
+        },
       },
     });
   } catch (error) {
@@ -102,9 +106,11 @@ const getCurrentUser = async (req, res, next) => {
     return res.status(HttpCode.OK).json({
       status: "success",
       code: HttpCode.OK,
-      user: {
-        email,
-        subscription,
+      data: {
+        user: {
+          email,
+          subscription,
+        },
       },
     });
   } catch (error) {
@@ -131,7 +137,7 @@ const updateSubscription = async (req, res, next) => {
       return res.status(HttpCode.OK).json({
         status: "success",
         code: HttpCode.OK,
-        data: { email, subscription },
+        data: { user: { email, subscription } },
       });
     }
 
