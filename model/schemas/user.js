@@ -1,6 +1,9 @@
 const mongoose = require("mongoose");
 const { Schema } = mongoose;
+const bcrypt = require("bcryptjs");
 const { Subscription } = require("../../helpers/constants");
+
+const SALT_FACTOR = 10;
 
 const userSchema = new Schema(
   {
@@ -13,6 +16,10 @@ const userSchema = new Schema(
       type: String,
       unique: true,
       required: [true, "Email is required"],
+      validate(value) {
+        const re = /\S+@\S+\.\S+/gi;
+        return re.test(String(value).toLowerCase());
+      },
     },
     subscription: {
       type: String,
@@ -29,6 +36,18 @@ const userSchema = new Schema(
     timestamps: true,
   }
 );
+
+userSchema.pre("save", async function (next) {
+  if (this.isModified("password")) {
+    const salt = await bcrypt.genSalt(SALT_FACTOR);
+    this.password = await bcrypt.hash(this.password, salt);
+  }
+  next();
+});
+
+userSchema.methods.validPassword = async function (password) {
+  return await bcrypt.compare(String(password), this.password);
+};
 
 const User = mongoose.model("user", userSchema);
 

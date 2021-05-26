@@ -1,27 +1,45 @@
 const Contact = require("./schemas/contact");
 
-const listContacts = async () => {
-  return await Contact.find({});
+const getAllContacts = async (userId, query) => {
+  const { limit = 20, page = 1, favorite = null } = query;
+  const optionsSearch = { owner: userId };
+
+  if (favorite !== null) {
+    optionsSearch.favorite = favorite;
+  }
+
+  const results = await Contact.paginate(optionsSearch, { limit, page });
+
+  const { docs: contacts, totalDocs: total } = results;
+
+  return { contacts, total, limit, page };
 };
 
-const getContactById = async (contactId) => {
-  return await Contact.findById(contactId);
+const getContactById = async (contactId, userId) => {
+  return await Contact.findOne({ _id: contactId, owner: userId });
 };
 
 const addContact = async (body) => {
   return await Contact.create(body);
 };
 
-const removeContact = async (contactId) => {
-  return await Contact.findByIdAndRemove(contactId);
+const removeContact = async (contactId, userId) => {
+  return await Contact.findOneAndRemove({ _id: contactId, owner: userId });
 };
 
-const updateContact = async (contactId, body) => {
-  return await Contact.findByIdAndUpdate(contactId, { ...body }, { new: true });
+const updateContact = async (contactId, userId, body) => {
+  return await Contact.findOneAndUpdate(
+    {
+      _id: contactId,
+      owner: userId,
+    },
+    { ...body },
+    { new: true }
+  );
 };
 
 module.exports = {
-  listContacts,
+  getAllContacts,
   getContactById,
   addContact,
   removeContact,

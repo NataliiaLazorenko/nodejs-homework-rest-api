@@ -6,6 +6,7 @@ const db = mongoose.connect(uriDb, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
   useCreateIndex: true,
+  useFindAndModify: false, // to fix the deprecation warning when using findOneAndUpdate
   poolSize: 5,
 });
 

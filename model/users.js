@@ -5,16 +5,26 @@ const getUserById = async (userId) => {
 };
 
 const getUserByEmail = async (email) => {
-  return await User.fondOne({ email });
+  return await User.findOne({ email });
 };
 
-const addUser = async (body) => {
+const createUser = async (body) => {
   const user = new User(body);
   return await user.save();
 };
 
-const updateUser = async (userId, token) => {
-  return await User.findByIdAndUpdate(userId, token, { new: true });
+const updateToken = async (userId, token) => {
+  return await User.findByIdAndUpdate(userId, { token }, { new: true });
 };
 
-module.exports = { getUserById, getUserByEmail, addUser, updateUser };
+const updateUserSubscription = async (userId, body) => {
+  return await User.findByIdAndUpdate(userId, { ...body }, { new: true });
+};
+
+module.exports = {
+  getUserById,
+  getUserByEmail,
+  createUser,
+  updateToken,
+  updateUserSubscription,
+};
