@@ -1,5 +1,6 @@
 const Joi = require("joi");
 const mongoose = require("mongoose");
+const { HttpCode } = require("../../../helpers/constants");
 
 const schemaAddContact = Joi.object({
   name: Joi.string().alphanum().min(2).max(30).required(),
@@ -7,7 +8,7 @@ const schemaAddContact = Joi.object({
     .email({ minDomainSegments: 2, tlds: { allow: ["com", "net", "ua"] } })
     .required(),
   phone: Joi.string().min(5).max(20).optional(),
-  favorite: Joi.boolean().optional(),
+  favorite: Joi.boolean().default(false).optional(),
 });
 
 const schemaUpdateContact = Joi.object({
@@ -28,7 +29,10 @@ const validate = async (schema, body, next) => {
     await schema.validateAsync(body);
     next();
   } catch (err) {
-    next({ status: 400, message: `Field: ${err.message.replace(/"/g, "")}` });
+    next({
+      status: HttpCode.BAD_REQUEST,
+      message: `Field: ${err.message.replace(/"/g, "")}`,
+    });
   }
 };
 
@@ -48,5 +52,7 @@ module.exports.validateId = (req, _res, next) => {
   const { contactId } = req.params;
   const isIdValid = mongoose.isValidObjectId(contactId);
 
-  isIdValid ? next() : next({ status: 400, message: "Invalid Id" });
+  isIdValid
+    ? next()
+    : next({ status: HttpCode.BAD_REQUEST, message: "Invalid Id" });
 };
