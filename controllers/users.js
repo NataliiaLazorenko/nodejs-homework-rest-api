@@ -6,10 +6,15 @@ const {
   createUser,
   updateToken,
   updateUserSubscription,
-} = require("../model/users");
+  updateUserAvatar,
+} = require("../repository/users");
+
 const { HttpCode } = require("../helpers/constants");
+const UploadAvatar = require("../services/upload-avatars");
 
 const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY;
+const PUBLIC_DIR = process.env.PUBLIC_DIR;
+const AVATARS_OF_USERS = process.env.AVATARS_OF_USERS;
 
 const signup = async (req, res, next) => {
   try {
@@ -24,7 +29,7 @@ const signup = async (req, res, next) => {
     }
 
     const newUser = await createUser(req.body);
-    const { id, email, subscription } = newUser;
+    const { id, email, subscription, avatarURL } = newUser;
 
     return res.status(HttpCode.CREATED).json({
       status: "success",
@@ -34,6 +39,7 @@ const signup = async (req, res, next) => {
           id,
           email,
           subscription,
+          avatarURL,
         },
       },
     });
@@ -101,7 +107,7 @@ const getCurrentUser = async (req, res, next) => {
       });
     }
 
-    const { email, subscription } = req.user;
+    const { email, subscription, avatarURL } = req.user;
 
     return res.status(HttpCode.OK).json({
       status: "success",
@@ -110,6 +116,7 @@ const getCurrentUser = async (req, res, next) => {
         user: {
           email,
           subscription,
+          avatarURL,
         },
       },
     });
@@ -151,10 +158,35 @@ const updateSubscription = async (req, res, next) => {
   }
 };
 
+const updateAvatar = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    const uploads = new UploadAvatar(PUBLIC_DIR, AVATARS_OF_USERS);
+
+    const avatarUrl = await uploads.saveAvatarToStatic({
+      userId,
+      pathFile: req.file.path,
+      name: req.file.filename,
+      oldFile: req.user.avatarURL,
+    });
+
+    await updateUserAvatar(userId, avatarUrl);
+
+    return res.json({
+      status: "success",
+      code: HttpCode.OK,
+      data: { avatarURL: avatarUrl },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   signup,
   login,
   logout,
   getCurrentUser,
   updateSubscription,
+  updateAvatar,
 };

@@ -4,7 +4,7 @@ const {
   addContact,
   removeContact,
   updateContact,
-} = require("../model/contacts");
+} = require("../repository/contacts");
 const { HttpCode } = require("../helpers/constants");
 
 const getAll = async (req, res, next) => {
@@ -74,10 +74,10 @@ const create = async (req, res, next) => {
       data: { newContact },
     });
   } catch (error) {
-    if (error.message.includes("duplicate key error")) {
-      error.status = HttpCode.BAD_REQUEST;
-      error.message = "email should be unique";
-    }
+    // if (error.message.includes("duplicate key error")) {
+    //   error.status = HttpCode.BAD_REQUEST;
+    //   error.message = "email should be unique";
+    // }
 
     next(error);
   }

@@ -1,3 +1,4 @@
+const path = require("path");
 const express = require("express");
 const logger = require("morgan");
 const cors = require("cors");
@@ -13,6 +14,12 @@ const app = express();
 const formatsLogger = app.get("env") === "development" ? "dev" : "short";
 
 app.use(helmet());
+
+// distribution of statics from the folder public
+require("dotenv").config();
+const PUBLIC_DIR = process.env.PUBLIC_DIR;
+app.use(express.static(path.join(__dirname, PUBLIC_DIR)));
+
 app.use(limiter);
 app.use(logger(formatsLogger));
 app.use(cors());

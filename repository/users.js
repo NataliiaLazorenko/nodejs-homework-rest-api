@@ -1,4 +1,4 @@
-const User = require("./schemas/user");
+const User = require("../model/schemas/user");
 
 const getUserById = async (userId) => {
   return await User.findById(userId);
@@ -21,10 +21,15 @@ const updateUserSubscription = async (userId, body) => {
   return await User.findByIdAndUpdate(userId, { ...body }, { new: true });
 };
 
+const updateUserAvatar = async (userId, avatarURL) => {
+  return await User.findByIdAndUpdate(userId, { avatarURL });
+};
+
 module.exports = {
   getUserById,
   getUserByEmail,
   createUser,
   updateToken,
   updateUserSubscription,
+  updateUserAvatar,
 };
