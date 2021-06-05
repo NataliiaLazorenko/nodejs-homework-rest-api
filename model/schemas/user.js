@@ -37,6 +37,11 @@ const userSchema = new Schema(
         return gravatar.url(this.email, { s: 250 }, true); // size 250px; protocol https (false - http)
       },
     },
+    // need avatarId when upload avatars to cloud
+    // avatarId: {
+    //   type: String,
+    //   default: null,
+    // },
   },
   {
     versionKey: false,

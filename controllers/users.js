@@ -1,6 +1,10 @@
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
 
+// =============== upload avatars to cloud ===============
+// const cloudinary = require("cloudinary").v2;
+// const { promisify } = require("util"); // allows to avoid callback and work with promises
+
 const {
   getUserByEmail,
   createUser,
@@ -10,11 +14,22 @@ const {
 } = require("../repository/users");
 
 const { HttpCode } = require("../helpers/constants");
-const UploadAvatar = require("../services/upload-avatars");
+
+const UploadAvatar = require("../services/upload-avatars-local"); // upload avatars local
+// const UploadAvatar = require("../services/upload-avatars-to-cloud"); // upload avatars to cloud
 
 const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY;
+
+// =============== upload avatars local ===============
 const PUBLIC_DIR = process.env.PUBLIC_DIR;
 const AVATARS_OF_USERS = process.env.AVATARS_OF_USERS;
+
+// =============== upload avatars to cloud ===============
+// cloudinary.config({
+//   cloud_name: process.env.CLOUD_NAME,
+//   api_key: process.env.API_KEY,
+//   api_secret: process.env.API_SECRET,
+// });
 
 const signup = async (req, res, next) => {
   try {
@@ -161,6 +176,8 @@ const updateSubscription = async (req, res, next) => {
 const updateAvatar = async (req, res, next) => {
   try {
     const userId = req.user.id;
+
+    // =============== upload avatars local ===============
     const uploads = new UploadAvatar(PUBLIC_DIR, AVATARS_OF_USERS);
 
     const avatarUrl = await uploads.saveAvatarToStatic({
@@ -171,6 +188,17 @@ const updateAvatar = async (req, res, next) => {
     });
 
     await updateUserAvatar(userId, avatarUrl);
+
+    // =============== upload avatars to cloud ===============
+    // const uploadCloud = promisify(cloudinary.uploader.upload);
+
+    // const uploads = new UploadAvatar(uploadCloud);
+    // const { avatarId, avatarUrl } = await uploads.saveAvatarToCloud(
+    //   req.file.path,
+    //   req.user.avatarId
+    // );
+
+    // await updateUserAvatar(userId, avatarUrl, avatarId);
 
     return res.json({
       status: "success",

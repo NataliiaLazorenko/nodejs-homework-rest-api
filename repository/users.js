@@ -21,9 +21,15 @@ const updateUserSubscription = async (userId, body) => {
   return await User.findByIdAndUpdate(userId, { ...body }, { new: true });
 };
 
+// upload avatars local
 const updateUserAvatar = async (userId, avatarURL) => {
   return await User.findByIdAndUpdate(userId, { avatarURL });
 };
+
+// upload avatars to cloud
+// const updateUserAvatar = async (userId, avatarURL, avatarId = null) => {
+//   return await User.findByIdAndUpdate(userId, { avatarURL, avatarId });
+// };
 
 module.exports = {
   getUserById,
