@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const controllers = require("../../../controllers/users");
 const guard = require("../../../helpers/guard");
+const upload = require("../../../helpers/upload");
 const {
   validateCreateUser,
   validateLogin,
@@ -14,9 +15,13 @@ router.post("/logout", guard, controllers.logout);
 router.get("/current", guard, controllers.getCurrentUser);
 router.patch(
   "/",
-  guard,
-  validateUpdateSubscription,
+  [guard, validateUpdateSubscription],
   controllers.updateSubscription
+);
+router.patch(
+  "/avatars",
+  [guard, upload.single("avatarURL")],
+  controllers.updateAvatar
 );
 
 module.exports = router;

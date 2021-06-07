@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const { Schema } = mongoose;
 const bcrypt = require("bcryptjs");
+const gravatar = require("gravatar"); // to automatically create default avatar
 const { Subscription } = require("../../helpers/constants");
 
 const SALT_FACTOR = 10;
@@ -30,6 +31,17 @@ const userSchema = new Schema(
       type: String,
       default: null,
     },
+    avatarURL: {
+      type: String,
+      default: function () {
+        return gravatar.url(this.email, { s: 250 }, true); // size 250px; protocol https (false - http)
+      },
+    },
+    // need avatarId when upload avatars to cloud
+    // avatarId: {
+    //   type: String,
+    //   default: null,
+    // },
   },
   {
     versionKey: false,

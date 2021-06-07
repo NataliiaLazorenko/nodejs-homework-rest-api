@@ -1,4 +1,4 @@
-const Contact = require("./schemas/contact");
+const Contact = require("../model/schemas/contact");
 
 const getAllContacts = async (userId, query) => {
   const { limit = 20, page = 1, favorite = null } = query;
