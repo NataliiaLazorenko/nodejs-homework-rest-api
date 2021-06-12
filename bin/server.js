@@ -1,6 +1,6 @@
 const path = require("path");
 const app = require("../app");
-const db = require("../model/db");
+const db = require("../db/db");
 const createFolderIfDontExist = require("../helpers/createDir");
 
 require("dotenv").config();

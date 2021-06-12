@@ -11,12 +11,20 @@ const {
   updateToken,
   updateUserSubscription,
   updateUserAvatar,
+  getUserByVerificationToken,
+  updateVerifyToken,
 } = require("../repository/users");
 
 const { HttpCode } = require("../helpers/constants");
 
 const UploadAvatar = require("../services/upload-avatars-local"); // upload avatars local
 // const UploadAvatar = require("../services/upload-avatars-to-cloud"); // upload avatars to cloud
+
+const EmailService = require("../services/email");
+const {
+  CreateSenderNodemailer,
+  // CreateSenderSendgrid,
+} = require("../services/sender-email");
 
 const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY;
 
@@ -44,7 +52,19 @@ const signup = async (req, res, next) => {
     }
 
     const newUser = await createUser(req.body);
-    const { id, email, subscription, avatarURL } = newUser;
+    const { id, email, subscription, avatarURL, verificationToken } = newUser;
+
+    try {
+      const emailService = new EmailService(
+        process.env.NODE_ENV,
+        // new CreateSenderSendgrid()
+        new CreateSenderNodemailer()
+      );
+
+      await emailService.sendVerifyEmail(verificationToken, email);
+    } catch (error) {
+      console.log(error.message);
+    }
 
     return res.status(HttpCode.CREATED).json({
       status: "success",
@@ -75,6 +95,14 @@ const login = async (req, res, next) => {
         status: "error",
         code: HttpCode.UNAUTHORIZED,
         message: "Invalid crendentials",
+      });
+    }
+
+    if (!user.isVerified) {
+      return res.status(HttpCode.UNAUTHORIZED).json({
+        status: "error",
+        code: HttpCode.UNAUTHORIZED,
+        message: "Check your email for verification",
       });
     }
 
@@ -210,6 +238,83 @@ const updateAvatar = async (req, res, next) => {
   }
 };
 
+const verify = async (req, res, next) => {
+  try {
+    const { verificationToken } = req.params;
+    const user = await getUserByVerificationToken(verificationToken);
+
+    if (user) {
+      const { userId } = user.id;
+      await updateVerifyToken(userId, true, null); // isVerified = true, verificationToken = null
+
+      return res.status(HttpCode.OK).json({
+        status: "success",
+        code: HttpCode.OK,
+        message: "Verification successful!",
+      });
+    }
+
+    return res.status(HttpCode.NOT_FOUND).json({
+      status: "error",
+      code: HttpCode.NOT_FOUND,
+      message: "User not found",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const resendEmailForVerification = async (req, res, next) => {
+  const { email } = req.body;
+
+  if (!email) {
+    return res.status(HttpCode.BAD_REQUEST).json({
+      status: "error",
+      code: HttpCode.BAD_REQUEST,
+      message: "Missing required field email",
+    });
+  }
+
+  const user = await getUserByEmail(email);
+
+  if (user) {
+    const { email, verificationToken, isVerified } = user;
+
+    if (!isVerified) {
+      try {
+        const emailService = new EmailService(
+          process.env.NODE_ENV,
+          new CreateSenderNodemailer()
+        );
+
+        await emailService.sendVerifyEmail(verificationToken, email);
+
+        return res.status(HttpCode.OK).json({
+          status: "success",
+          code: HttpCode.OK,
+          message: "Verification email sent",
+        });
+      } catch (error) {
+        console.log(error.message);
+
+        return next(error);
+      }
+    }
+
+    return res.status(HttpCode.BAD_REQUEST).json({
+      status: "error",
+      code: HttpCode.BAD_REQUEST,
+      message: "Verification has already been passed",
+    });
+  }
+
+  return res.status(HttpCode.NOT_FOUND).json({
+    status: "error",
+    code: HttpCode.NOT_FOUND,
+    message: "User not found",
+  });
+};
+
 module.exports = {
   signup,
   login,
@@ -217,4 +322,6 @@ module.exports = {
   getCurrentUser,
   updateSubscription,
   updateAvatar,
+  verify,
+  resendEmailForVerification,
 };

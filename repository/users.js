@@ -1,4 +1,4 @@
-const User = require("../model/schemas/user");
+const User = require("../schemas/user");
 
 const getUserById = async (userId) => {
   return await User.findById(userId);
@@ -31,6 +31,17 @@ const updateUserAvatar = async (userId, avatarURL) => {
 //   return await User.findByIdAndUpdate(userId, { avatarURL, avatarId });
 // };
 
+const getUserByVerificationToken = async (verificationToken) => {
+  return await User.findOne({ verificationToken });
+};
+
+const updateVerifyToken = async (userId, isVerified, verificationToken) => {
+  return await User.findByIdAndUpdate(userId, {
+    isVerified,
+    verificationToken,
+  });
+};
+
 module.exports = {
   getUserById,
   getUserByEmail,
@@ -38,4 +49,6 @@ module.exports = {
   updateToken,
   updateUserSubscription,
   updateUserAvatar,
+  getUserByVerificationToken,
+  updateVerifyToken,
 };

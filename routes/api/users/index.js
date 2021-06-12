@@ -7,21 +7,28 @@ const {
   validateCreateUser,
   validateLogin,
   validateUpdateSubscription,
+  validateResendEmail,
 } = require("./validation");
 
+router.get("/verify/:verificationToken", controllers.verify);
+router.post(
+  "/verify",
+  validateResendEmail,
+  controllers.resendEmailForVerification
+);
 router.post("/signup", validateCreateUser, controllers.signup);
 router.post("/login", validateLogin, controllers.login);
 router.post("/logout", guard, controllers.logout);
 router.get("/current", guard, controllers.getCurrentUser);
 router.patch(
-  "/",
-  [guard, validateUpdateSubscription],
-  controllers.updateSubscription
-);
-router.patch(
   "/avatars",
   [guard, upload.single("avatarURL")],
   controllers.updateAvatar
+);
+router.patch(
+  "/",
+  [guard, validateUpdateSubscription],
+  controllers.updateSubscription
 );
 
 module.exports = router;
