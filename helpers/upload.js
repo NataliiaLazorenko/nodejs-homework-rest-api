@@ -19,7 +19,10 @@ const upload = multer({
   limits: { fileSize: 2000000 }, // max file size 2Мб
   fileFilter: (_req, file, cb) => {
     if (!file.mimetype.includes("image")) {
-      cb(new Error("Only images are allowed to be uploaded"), false);
+      const error = new Error("Only images are allowed to be uploaded");
+      error.status = 400;
+      cb(error);
+
       return;
     }
 
